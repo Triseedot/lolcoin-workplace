@@ -61,12 +61,22 @@ column(5): is_active; boolean (default = false)
 
 # states initialization
 class SG(StatesGroup):
+    BasicState = State()
     ReportState = State()
 
 
-# keyboard initialization
+# keyboards initialization
 reportkb = types.ReplyKeyboardMarkup(resize_keyboard=True)
 reportkb.add(types.InlineKeyboardButton(text='Отменить ❌'))
+
+basekb = types.ReplyKeyboardMarkup(resize_keyboard=True)
+button1 = types.InlineKeyboardButton(text='Баланс 💸')
+button2 = types.InlineKeyboardButton(text='Список предложений 📄')
+button3 = types.InlineKeyboardButton(text='Заключить сделку 📝')
+button4 = types.InlineKeyboardButton(text="Команды ❔")
+button5 = types.InlineKeyboardButton(text="FAQ ❓")
+button6 = types.InlineKeyboardButton(text="Жалоба ❗")
+basekb.add(button1).row(button2, button3).raw(button4, button5).add(button6)
 
 
 # main part with all bot commands
@@ -85,12 +95,18 @@ async def on_shutdown(dispatcher):
 
 
 async def help_message(message: Message):
-    await message.answer('Как пополнить баланс вы можете узнать при помощи команды /balance.\nПосмотреть '
-                         'текущие товары и услуги можно командой /services.\nЕсли у вас остались вопросы, '
-                         'возможно вы найдете ответы, введя команду /fag, в противном случае задайте '
-                         'вопрос админу при помощи всё того же /report.\nЕсли вам понадобится перечитать это '
-                         'сообщение, напишите /help.\nВы также можете использовать встроенную клавиатуру '
-                         'вместо того, чтобы писать команды.')
+    await message.answer('- Как пополнить баланс вы можете узнать при помощи команды /balance.\n'
+                         '- Посмотреть текущие товары и услуги можно командой /services.\n'
+                         '- Оформить заказ вы можете с помощью /buy.\n'
+                         '- Если у вас остались вопросы, возможно вы найдете ответы, введя команду /faq, в противном'
+                         ' случае задайте вопрос админу при помощи всё того же /report.'
+                         '- Если вам понадобится перечитать это сообщение, напишите /help.\n'
+                         'Вы также можете использовать встроенную клавиатуру вместо того, чтобы писать команды.')
+
+
+async def switch_to_base(message: Message):
+    await SG.BasicState.set()
+    await message.answer("Выберите дейсвтие:")
 
 
 @dp.message_handler(commands=['start'])
@@ -117,6 +133,7 @@ async def start(message: Message):
                                  f'баланс.')
             await help_message(message)
             await message.answer('Приятного пользования 🙃')
+            await switch_to_base(message)
         else:
             if result[0] != message.from_user.id:
                 await message.answer('Извините, кажется произошла какая-то накладка, видимо у вас совпал ник в '
@@ -124,20 +141,21 @@ async def start(message: Message):
                                      'фамилию при помощи команды /report, чтобы мы исправили эту ошибку.')
             else:
                 await message.answer(f'Ещё раз приветствую вас, {result[1]}!')
+                await switch_to_base(message)
     else:
         await message.answer('Извините, мы не смогли определить вас как ученика лагеря ЛОЛ. Увы, мы не смогли найти '
                              'телеграм-аккаунт каждого, пожалуйста, напишите нам свои имя и фамилию при помощи '
                              'команды /report')
 
 
-@dp.message_handler(commands=['help'])
-@dp.message_handler(content_types=['text'], text='Команды')
+# @dp.message_handler(commands=['help'])
+@dp.message_handler(content_types=['text'], text=['Команды ❔', '/help'])
 async def help_command(message: Message):
     await help_message(message)
 
 
-@dp.message_handler(commands=['report'])
-@dp.message_handler(content_types=['text'], text='Жалоба')
+# @dp.message_handler(commands=['report'])
+@dp.message_handler(content_types=['text'], text=['Жалоба ❗', '/report'])
 async def report_command(message: Message):
     await SG.ReportState.set()
     await message.answer('Следующим сообщением напишите текст вашего обращения. Если вы передумали, напишите команду '
@@ -145,13 +163,14 @@ async def report_command(message: Message):
 
 
 @dp.message_handler(state=SG.ReportState)
-async def report_send(message: Message, state: FSMContext):
+async def report_send(message: Message):
     if message.text == '/cancel' or message.text == 'Отменить ❌':
         await message.answer('Действие успешно отменено ✅')
-        await state.finish()
+        await switch_to_base(message)
     else:
         await bot.send_message(admin, message.text)
         await message.answer('Репорт успешно отправлен ✅')
+        await switch_to_base(message)
 
 
 '''
