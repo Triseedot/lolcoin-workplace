@@ -106,7 +106,7 @@ async def help_message(message: Message):
 
 async def switch_to_base(message: Message):
     await SG.BasicState.set()
-    await message.answer("Выберите дейсвтие:")
+    await message.answer("Выберите дейсвтие:", reply_markup=basekb)
 
 
 @dp.message_handler(commands=['start'])
@@ -149,13 +149,13 @@ async def start(message: Message):
 
 
 # @dp.message_handler(commands=['help'])
-@dp.message_handler(content_types=['text'], text=['Команды ❔', '/help'])
+@dp.message_handler(state=SG.BasicState, content_types=['text'], text=['Команды ❔', '/help'])
 async def help_command(message: Message):
     await help_message(message)
 
 
 # @dp.message_handler(commands=['report'])
-@dp.message_handler(content_types=['text'], text=['Жалоба ❗', '/report'])
+@dp.message_handler(state=SG.BasicState, content_types=['text'], text=['Жалоба ❗', '/report'])
 async def report_command(message: Message):
     await SG.ReportState.set()
     await message.answer('Следующим сообщением напишите текст вашего обращения. Если вы передумали, напишите команду '
