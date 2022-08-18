@@ -76,7 +76,7 @@ button3 = types.InlineKeyboardButton(text='Заключить сделку 📝'
 button4 = types.InlineKeyboardButton(text="Команды ❔")
 button5 = types.InlineKeyboardButton(text="FAQ ❓")
 button6 = types.InlineKeyboardButton(text="Жалоба ❗")
-basekb.add(button1).row(button2, button3).raw(button4, button5).add(button6)
+basekb.add(button1).row(button2, button3).row(button4, button5).add(button6)
 
 
 # main part with all bot commands
