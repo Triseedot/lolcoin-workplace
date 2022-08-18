@@ -81,12 +81,10 @@ async def help_message(message: Message):
 async def start(message: Message):
     username = message.from_user.username
     logging.warning(username)
-    username += (300 - len(username)) * ' '
-    cur.execute(f"""SELECT * FROM users WHERE username = '{username}'""")
+    cur.execute(f"""SELECT * FROM users WHERE username = '@{username}'""")
     result = cur.fetchone()
     if not result:
         username = message.from_user.first_name + ' ' + message.from_user.last_name
-        username += (300 - len(username)) * ' '
         cur.execute(f"""SELECT * FROM users WHERE username = '{username}'""")
         result = cur.fetchone()
     if result:
