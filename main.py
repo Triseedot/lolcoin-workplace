@@ -27,19 +27,30 @@ WEBAPP_PORT = int(os.getenv("PORT", default=8000))
 
 # database setup
 DB_URL = os.getenv('DATABASE_URL')
-result = urlparse(DB_URL)
-username = result.username
-password = result.password
-database = result.path[1:]
-hostname = result.hostname
-port = result.port
+db_parse = urlparse(DB_URL)
+db_username = db_parse.username
+db_password = db_parse.password
+db_name = db_parse.path[1:]
+db_hostname = db_parse.hostname
+db_port = db_parse.port
 conn = psycopg2.connect(
-    database=database,
-    user=username,
-    password=password,
-    host=hostname,
-    port=port
+    database=db_name,
+    user=db_username,
+    password=db_password,
+    host=db_hostname,
+    port=db_port
 )
+cur = conn.cursor()
+'''
+Database structure:
+- "*" means preset value 
+column(0): id; integer (default = -1)
+*column(1): username; char(300)
+*column(2): full_name; char(300)
+*column(3): wallet_id; char(64) (contains lolcoin wallet id of len 64)
+column(4): balance; integer (default = 0)
+column(5): is_active; boolean (default = false)
+'''
 
 
 # main part with all bot commands
@@ -51,14 +62,61 @@ async def on_startup(dispatcher):
 async def on_shutdown(dispatcher):
     logging.warning('Shutting down..')
     await bot.delete_webhook()
+    conn.close()
     # await dp.storage.close()
     # await dp.storage.wait_closed()
     logging.warning('Bye!')
 
 
+async def help_message(message: Message):
+    await message.answer('Как пополнить баланс вы можете узнать при помощи команды /balance. Посмотреть '
+                         'текущие товары и услуги можно командой /services. Если у вас остались вопросы, '
+                         'возможно вы найдете ответы, введя команду /fag, в противном случае задайте '
+                         'вопрос админу при помощи всё того же /report. Если вам понадобится перечитать это '
+                         'сообщение, напишите /help. Вы также можете использовать встроенную клавиатуру '
+                         'вместо того, чтобы писать команды. Приятного использования.')
+
+
 @dp.message_handler(commands=['start'])
 async def start(message: Message):
-    await message.answer('Oh, hello there!')
+    username = message.from_user.username
+    cur.execute(f"""SELECT * FROM users WHERE username = '{username}'""")
+    result = cur.fetchone()
+    if not result:
+        username = message.from_user.first_name + ' ' + message.from_user.last_name
+        cur.execute(f"""SELECT * FROM users WHERE username = '{username}'""")
+        result = cur.fetchone()
+    if len(result) > 0:
+        if not result[5]:
+            cur.execute(
+                f"""UPDATE users SET is_active = true WHERE username = '{username}'"""
+            )
+            cur.execute(
+                f"""UPDATE users SET id = {message.from_user.id} WHERE username = '{username}'"""
+            )
+            conn.commit()
+            await message.answer(f'Приветствую, {result[1]}! Мы опредеили вас, как {result[2]}. Если это не так, '
+                                 f'пожалуйста, напишите админу свои имя и фамилию при помощи команды /report. Если '
+                                 f'этого не сделать, вы будете привязаны к чужому кошельку и не сможете пополнять ваш '
+                                 f'баланс.')
+            await help_message(message)
+        else:
+            if result[0] != message.from_user.id:
+                await message.answer('Извините, кажется произошла какая-то накладка, видимо у вас совпал ник в '
+                                     'телеграм-аккаунте с кем-то другим. Пожалуйста, напишите админу свои имя и '
+                                     'фамилию при помощи команды /report, чтобы мы исправили эту ошибку.')
+            else:
+                await message.answer(f'Ещё раз приветствую вас, {result[1]}!')
+    else:
+        await message.answer('Извините, мы не смогли определить вас как ученика лагеря ЛОЛ. Увы, мы не смогли найти '
+                             'телеграм-аккаунт каждого, пожалуйста, напишите админу свои имя и фамилию при помощи '
+                             'команды /report')
+
+
+@dp.message_handler(commands=['help'])
+@dp.message_handler(content_types=['text'], text='Комманды')
+async def help_command(message: Message):
+    await help_message(message)
 
 
 @dp.message_handler()
