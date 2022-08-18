@@ -79,6 +79,11 @@ button6 = types.InlineKeyboardButton(text="Жалоба ❗")
 basekb.add(button1).row(button2, button3).row(button4, button5).add(button6)
 
 
+async def switch_to_base(message: Message):
+    await SG.BasicState.set()
+    await message.answer("Выберите дейсвтие:", reply_markup=basekb)
+
+
 # main part with all bot commands
 async def on_startup(dispatcher):
     await bot.delete_webhook()
@@ -104,12 +109,7 @@ async def help_message(message: Message):
                          'Вы также можете использовать встроенную клавиатуру вместо того, чтобы писать команды.')
 
 
-async def switch_to_base(message: Message):
-    await SG.BasicState.set()
-    await message.answer("Выберите дейсвтие:", reply_markup=basekb)
-
-
-@dp.message_handler(commands=['start'])
+@dp.message_handler()
 async def start(message: Message):
     username = '@' + message.from_user.username
     cur.execute(f"""SELECT * FROM users WHERE username = '{username}'""")
@@ -140,7 +140,8 @@ async def start(message: Message):
                                      'телеграм-аккаунте с кем-то другим. Пожалуйста, напишите нам свои имя и '
                                      'фамилию при помощи команды /report, чтобы мы исправили эту ошибку.')
             else:
-                await message.answer(f'Ещё раз приветствую вас, {result[1]}!')
+                await message.answer(f'Ещё раз приветствую вас, {result[1]}! Бот был перезапущен и ваша сессия была '
+                                     f'оборвана, перенаправляем вас обрано...')
                 await switch_to_base(message)
     else:
         await message.answer('Извините, мы не смогли определить вас как ученика лагеря ЛОЛ. Увы, мы не смогли найти '
@@ -177,7 +178,7 @@ async def report_send(message: Message):
 async def balance_command(message: Message):
     cur.execute(f"""SELECT balance FROM users WHERE id = '{message.from_user.id}'""")
     result = cur.fetchone()
-    await message.answer(f'*На вашем счету {result / 100} lolcoin*\nЧтобы пополнить счет переведите от 2 lolcoin на '
+    await message.answer(f'*На вашем счету {result[0] / 100} lolcoin*\nЧтобы пополнить счет переведите от 2 lolcoin на '
                          f'lolcoin_platform.near. При любом переводе 1 lolcoin будет взят в качестве комиссии, '
                          f'а остальное будет зачислено на ваш баланс. После перевода в течении следующих 5-ти минут '
                          f'система прочитает ваш перевод и вам придёт сообщение о успешном пополнении баланса. Если '
@@ -185,11 +186,9 @@ async def balance_command(message: Message):
                          f'проблеме через /report.', parse_mode="Markdown")
 
 
-'''
-@dp.message_handler()
-async def echo(message: Message):
-    await message.answer(message.text)
-'''
+@dp.message_handler(state=SG.BasicState)
+async def unknown_command(message: Message):
+    await message.answer("Команда не была опознана.")
 
 # bot start
 if __name__ == '__main__':
