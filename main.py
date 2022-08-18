@@ -79,9 +79,8 @@ async def help_message(message: Message):
 
 @dp.message_handler(commands=['start'])
 async def start(message: Message):
-    username = message.from_user.username
-    logging.warning(username)
-    cur.execute(f"""SELECT * FROM users WHERE username = '@{username}'""")
+    username = '@' + message.from_user.username
+    cur.execute(f"""SELECT * FROM users WHERE username = '{username}'""")
     result = cur.fetchone()
     if not result:
         username = message.from_user.first_name + ' ' + message.from_user.last_name
