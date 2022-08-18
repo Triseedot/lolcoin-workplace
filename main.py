@@ -3,6 +3,7 @@ from aiogram import Bot, types
 from aiogram.types import Message
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.executor import start_webhook
@@ -14,7 +15,7 @@ from urllib.parse import urlparse
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = Bot(token=BOT_TOKEN)
 logging.basicConfig(level=logging.INFO)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
 
 # admin id define
@@ -153,10 +154,11 @@ async def report_send(message: Message, state: FSMContext):
         await message.answer('Репорт успешно отправлен ✅')
 
 
+'''
 @dp.message_handler()
 async def echo(message: Message):
     await message.answer(message.text)
-
+'''
 
 # bot start
 if __name__ == '__main__':
