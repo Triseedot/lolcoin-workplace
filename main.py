@@ -5,7 +5,6 @@ from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
-from aiogram.utils.emoji import emojize
 from aiogram.utils.executor import start_webhook
 import logging
 import psycopg2
@@ -66,7 +65,7 @@ class SG(StatesGroup):
 
 # keyboard initialization
 reportkb = types.ReplyKeyboardMarkup(resize_keyboard=True)
-reportkb.add(types.InlineKeyboardButton(text='Отменить ' + emojize(":x:")))
+reportkb.add(types.InlineKeyboardButton(text='Отменить ❌'))
 
 
 # main part with all bot commands
@@ -116,7 +115,7 @@ async def start(message: Message):
                                  f'этого не сделать, вы будете привязаны к чужому кошельку и не сможете пополнять ваш '
                                  f'баланс.')
             await help_message(message)
-            await message.answer('Приятного пользования ' + emojize(':upside_down:'))
+            await message.answer('Приятного пользования 🙃')
         else:
             if result[0] != message.from_user.id:
                 await message.answer('Извините, кажется произошла какая-то накладка, видимо у вас совпал ник в '
@@ -146,12 +145,12 @@ async def report_command(message: Message):
 
 @dp.message_handler(state=SG.ReportState)
 async def report_send(message: Message, state: FSMContext):
-    if message.text == '/cancel' or message.text == 'Отменить ' + emojize(":x:"):
-        await message.answer('Действие успешно отменено ' + emojize(":white_check_mark:"))
+    if message.text == '/cancel' or message.text == 'Отменить ❌':
+        await message.answer('Действие успешно отменено ✅')
         await state.finish()
     else:
         await bot.send_message(admin, message.text)
-        await message.answer('Репорт успешно отправлен ' + emojize(":white_check_mark:"))
+        await message.answer('Репорт успешно отправлен ✅')
 
 
 @dp.message_handler()
