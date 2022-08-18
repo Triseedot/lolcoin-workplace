@@ -3,6 +3,9 @@ from aiogram import Bot, types
 from aiogram.types import Message
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher import FSMContext
+from aiogram.utils.emoji import emojize
 from aiogram.utils.executor import start_webhook
 import logging
 import psycopg2
@@ -14,6 +17,9 @@ bot = Bot(token=BOT_TOKEN)
 logging.basicConfig(level=logging.INFO)
 dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())
+
+# admin id define
+admin = os.getenv('ADMIN_ID')
 
 # webhook settings
 APP_NAME = os.getenv('APP_NAME')
@@ -53,6 +59,16 @@ column(5): is_active; boolean (default = false)
 '''
 
 
+# states initialization
+class SG(StatesGroup):
+    ReportState = State()
+
+
+# keyboard initialization
+reportkb = types.ReplyKeyboardMarkup(resize_keyboard=True)
+reportkb.add(types.InlineKeyboardButton(text='Отменить ' + emojize(":x:")))
+
+
 # main part with all bot commands
 async def on_startup(dispatcher):
     await bot.delete_webhook()
@@ -74,7 +90,7 @@ async def help_message(message: Message):
                          'возможно вы найдете ответы, введя команду /fag, в противном случае задайте '
                          'вопрос админу при помощи всё того же /report.\nЕсли вам понадобится перечитать это '
                          'сообщение, напишите /help.\nВы также можете использовать встроенную клавиатуру '
-                         'вместо того, чтобы писать команды. Приятного использования.')
+                         'вместо того, чтобы писать команды.')
 
 
 @dp.message_handler(commands=['start'])
@@ -100,6 +116,7 @@ async def start(message: Message):
                                  f'этого не сделать, вы будете привязаны к чужому кошельку и не сможете пополнять ваш '
                                  f'баланс.')
             await help_message(message)
+            await message.answer('Приятного пользования ' + emojize(':upside_down:'))
         else:
             if result[0] != message.from_user.id:
                 await message.answer('Извините, кажется произошла какая-то накладка, видимо у вас совпал ник в '
@@ -114,9 +131,27 @@ async def start(message: Message):
 
 
 @dp.message_handler(commands=['help'])
-@dp.message_handler(content_types=['text'], text='Комманды')
+@dp.message_handler(content_types=['text'], text='Команды')
 async def help_command(message: Message):
     await help_message(message)
+
+
+@dp.message_handler(commands=['report'])
+@dp.message_handler(content_types=['text'], text='Жалоба')
+async def report_command(message: Message):
+    await SG.ReportState.set()
+    await message.answer('Следующим сообщением напишите текст вашего обращения. Если вы передумали, напишите команду '
+                         '/cancel, или выберете соответствующую опцию в вашей встроенной клавиатуре.', reply_markup=reportkb)
+
+
+@dp.message_handler(state=SG.ReportState)
+async def report_send(message: Message, state: FSMContext):
+    if message.text == '/cancel' or message.text == 'Отменить ' + emojize(":x:"):
+        await message.answer('Действие успешно отменено ' + emojize(":white_check_mark:"))
+        await state.finish()
+    else:
+        await bot.send_message(admin, message.text)
+        await message.answer('Репорт успешно отправлен ' + emojize(":white_check_mark:"))
 
 
 @dp.message_handler()
