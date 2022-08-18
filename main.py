@@ -178,12 +178,12 @@ async def report_send(message: Message):
 async def balance_command(message: Message):
     cur.execute(f"""SELECT balance FROM users WHERE id = '{message.from_user.id}'""")
     user_balance = float(cur.fetchone()[0]) / 100
-    await message.answer(f'*На вашем счету {user_balance} lolcoin*\nЧтобы пополнить счет переведите от 2 lolcoin на '
+    await message.answer(f'На вашем счету {user_balance} lolcoin\nЧтобы пополнить счет переведите от 2 lolcoin на '
                          f'lolcoin_platform.near. При любом переводе 1 lolcoin будет взят в качестве комиссии, '
                          f'а остальное будет зачислено на ваш баланс. После перевода в течении следующих 5-ти минут '
                          f'система прочитает ваш перевод и вам придёт сообщение о успешном пополнении баланса. Если '
                          f'же этого не произошло, убедитесь что вы перевели не менее 2 lolcoin, после чего напишите о '
-                         f'проблеме через /report.', parse_mode="Markdown")
+                         f'проблеме через /report.')
 
 
 @dp.message_handler(state=SG.BasicState)
