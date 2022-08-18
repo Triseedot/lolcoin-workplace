@@ -5,6 +5,8 @@ from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_webhook
 import logging
+import psycopg2
+from urllib.parse import urlparse
 
 # bot initialization
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -22,6 +24,22 @@ WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 # webserver settings
 WEBAPP_HOST = '0.0.0.0'
 WEBAPP_PORT = int(os.getenv("PORT", default=8000))
+
+# database setup
+DB_URL = os.getenv('DATABASE_URL')
+result = urlparse(DB_URL)
+username = result.username
+password = result.password
+database = result.path[1:]
+hostname = result.hostname
+port = result.port
+conn = psycopg2.connect(
+    database=database,
+    user=username,
+    password=password,
+    host=hostname,
+    port=port
+)
 
 
 # main part with all bot commands
