@@ -86,7 +86,7 @@ async def start(message: Message):
         username = message.from_user.first_name + ' ' + message.from_user.last_name
         cur.execute(f"""SELECT * FROM users WHERE username = '{username}'""")
         result = cur.fetchone()
-    if len(result) > 0:
+    if result:
         if not result[5]:
             cur.execute(
                 f"""UPDATE users SET is_active = true WHERE username = '{username}'"""
