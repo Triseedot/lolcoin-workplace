@@ -104,7 +104,9 @@ async def check(wait_for):
                                                       f" lolcoin, из которых {transaction['amount'] / 100 - 1} были"
                                                       " зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
                                                       " комиссии.")
+        logging.warning(2)
         await asyncio.sleep(wait_for)
+        logging.warning(3)
 
 
 # main part with all bot commands
