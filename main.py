@@ -195,7 +195,9 @@ async def unknown_command(message: Message):
 
 async def check(wait_for):
     while True:
+        logging.warning(1)
         await asyncio.sleep(wait_for)
+        logging.warning(2)
         transactions = parsing()
         if transactions:
             for transaction in transactions:
