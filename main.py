@@ -108,7 +108,7 @@ async def check(wait_for):
                                                       " комиссии.")
 
 
-parsing()
+check(60)
 
 
 # main part with all bot commands
