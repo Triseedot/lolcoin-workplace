@@ -217,7 +217,7 @@ async def unknown_command(message: Message):
 
 # bot start
 if __name__ == '__main__':
-    asyncio.ensure_future(check(60))
+    asyncio.ensure_future(check(30))
     executor.start_polling(dp, skip_updates=True)
     '''start_webhook(
         dispatcher=dp,
