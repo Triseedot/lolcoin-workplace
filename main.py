@@ -103,12 +103,9 @@ async def check(wait_for):
                         f"""UPDATE users SET balance = {result[1] + transaction["amount"]} WHERE id = '{result[0]}'"""
                     )
                     await bot.send_message(result[0], f"✅ Вы перевели на платформу {transaction['amount'] / 100}"
-                                                      f"lolcoin, из которых {transaction['amount'] / 100 - 1} были"
-                                                      "зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
+                                                      f" lolcoin, из которых {transaction['amount'] / 100 - 1} были"
+                                                      " зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
                                                       " комиссии.")
-
-
-check(60)
 
 
 # main part with all bot commands
@@ -230,4 +227,4 @@ if __name__ == '__main__':
         port=WEBAPP_PORT
     )
     loop = asyncio.get_event_loop()
-    loop.create_task(check(30))
+    loop.run_until_complete(check(60))
