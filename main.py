@@ -10,6 +10,8 @@ from aiogram.utils.executor import start_webhook
 import logging
 import psycopg2
 from urllib.parse import urlparse
+from transactions_parser import parsing
+import asyncio
 
 # bot initialization
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -190,8 +192,28 @@ async def balance_command(message: Message):
 async def unknown_command(message: Message):
     await message.answer("Команда не была опознана.")
 
+
+async def check(wait_for):
+    while True:
+        await asyncio.sleep(wait_for)
+        transactions = parsing()
+        if transactions:
+            for transaction in transactions:
+                cur.execute(f"""SELECT id, balance FROM users WHERE wallet_id = '{transaction["sender"]}'""")
+                result = cur.fetchone()
+                if result and transaction["amount"] >= 200:
+                    cur.execute(
+                        f"""UPDATE users SET balance = {result[1] + transaction["amount"]} WHERE id = '{result[0]}'"""
+                    )
+                    await bot.send_message(result[0], f"✅ Вы перевели на платформу {transaction['amount'] / 100}"
+                                                      f"lolcoin, из которых {transaction['amount'] / 100 - 1} были"
+                                                      "зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
+                                                      " комиссии.")
+
 # bot start
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.create_task(check(60))
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
