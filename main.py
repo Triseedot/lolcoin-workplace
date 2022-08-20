@@ -199,9 +199,11 @@ async def check(wait_for):
         transactions = parsing()
         if transactions:
             for transaction in transactions:
-                cur.execute(f"""SELECT id, balance FROM users WHERE wallet_id = '{transaction["sender"]}'""")
+                logging.warning(transaction["amount"])
+                cur.execute(f"""SELECT * FROM users WHERE wallet_id = '{transaction["sender"]}'""")
                 result = cur.fetchone()
                 if result and transaction["amount"] >= 200:
+                    result = [result[0], result[4]]
                     cur.execute(
                         f"""UPDATE users SET balance = {result[1] + transaction["amount"]} WHERE id = '{result[0]}'"""
                     )
