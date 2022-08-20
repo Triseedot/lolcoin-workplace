@@ -228,4 +228,5 @@ if __name__ == '__main__':
         port=WEBAPP_PORT,
     )
     loop = asyncio.get_event_loop()
-    loop.create_task(check(60))
+    asyncio.ensure_future(check(60))
+    loop.run_forever()
