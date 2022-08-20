@@ -217,9 +217,9 @@ async def unknown_command(message: Message):
 
 # bot start
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.create_task(check(30))
-    loop.run_forever()
+    # loop = asyncio.get_event_loop()
+    # loop.create_task(check(30))
+    asyncio.run(check(60))
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
