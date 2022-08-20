@@ -4,6 +4,7 @@ import os
 
 SITE_URL = "https://explorer.mainnet.near.org"
 PLATFORM_ID = "lolcoin_platform.near"
+PORT = int(os.getenv("PORT", default=5000))
 
 file = open('transictions_list.txt', 'r+')
 file_transactions = file.read().split('\n')
@@ -11,10 +12,11 @@ file_transactions = file.read().split('\n')
 
 def parsing():
     URL = SITE_URL + "/accounts/lolcoin.qbit.near"
-    page = requests.get(URL)
+    page = requests.get(URL + f":{PORT}")
     soup = bs(page.text, "html.parser")
     transactions = []
     for element in soup.find_all('div', class_='c-ActionRowTransaction-lbSlCc col'):
+        print(1)
         transaction = element.find('a', href=True)
         transaction_url = transaction['href']
         if transaction_url in file_transactions:
@@ -29,7 +31,7 @@ def parsing():
     sender = ''
     for TRANSACTION_URL in transactions:
         URL = SITE_URL + TRANSACTION_URL
-        page = requests.get(URL)
+        page = requests.get(URL + f":{PORT}")
         soup = bs(page.text, "html.parser")
         result = soup.find('div', class_='c-ReceiptRowStatus-cQiaau col')
         if result.text != 'Empty result':
