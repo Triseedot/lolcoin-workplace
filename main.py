@@ -116,7 +116,7 @@ def my_callback():
     asyncio.ensure_future(check())
 
 
-await check()
+check()
 
 
 # main part with all bot commands
