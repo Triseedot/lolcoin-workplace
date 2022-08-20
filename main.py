@@ -86,23 +86,26 @@ async def switch_to_base(message: Message):
     await message.answer("Выберите дейсвтие:", reply_markup=basekb)
 
 
-async def check():
-    logging.warning(1)
-    transactions = parsing()
-    if transactions:
-        for transaction in transactions:
-            logging.warning(transaction["amount"])
-            cur.execute(f"""SELECT * FROM users WHERE wallet_id = '{transaction["sender"]}'""")
-            result = cur.fetchone()
-            if result and transaction["amount"] >= 200:
-                result = [result[0], result[4]]
-                cur.execute(
-                    f"""UPDATE users SET balance = {result[1] + transaction["amount"]} WHERE id = '{result[0]}'"""
-                )
-                await bot.send_message(result[0], f"✅ Вы перевели на платформу {transaction['amount'] / 100}"
-                                                  f" lolcoin, из которых {transaction['amount'] / 100 - 1} были"
-                                                  " зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
-                                                  " комиссии.")
+async def check(wait_for):
+    while True:
+        logging.warning(1)
+        await asyncio.sleep(wait_for)
+        logging.warning(2)
+        transactions = parsing()
+        if transactions:
+            for transaction in transactions:
+                logging.warning(transaction["amount"])
+                cur.execute(f"""SELECT * FROM users WHERE wallet_id = '{transaction["sender"]}'""")
+                result = cur.fetchone()
+                if result and transaction["amount"] >= 200:
+                    result = [result[0], result[4]]
+                    cur.execute(
+                        f"""UPDATE users SET balance = {result[1] + transaction["amount"] - 100} WHERE id = '{result[0]}'"""
+                    )
+                    await bot.send_message(result[0], f"✅ Вы перевели на платформу {transaction['amount'] / 100}"
+                                                      f" lolcoin, из которых {transaction['amount'] / 100 - 1} были"
+                                                      " зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
+                                                      " комиссии.")
 
 
 # main part with all bot commands
@@ -210,7 +213,7 @@ async def balance_command(message: Message):
 @dp.message_handler(state=SG.BasicState, content_types=['text'], text=['/update'])
 async def transfer_update(message: Message):
     if message.from_user.id == int(admin):
-        await check()
+        await check(60)
     else:
         await message.answer(f'Not admin, {message.from_user.id}, {admin}')
 
@@ -222,6 +225,7 @@ async def unknown_command(message: Message):
 
 # bot start
 if __name__ == '__main__':
+    asyncio.ensure_future(check(60))
     # executor.start_polling(dp, skip_updates=True)
     start_webhook(
         dispatcher=dp,
