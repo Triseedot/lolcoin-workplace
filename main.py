@@ -108,6 +108,9 @@ async def check(wait_for):
                                                       " комиссии.")
 
 
+parsing()
+
+
 # main part with all bot commands
 async def on_startup(dispatcher):
     await bot.delete_webhook()
@@ -228,4 +231,3 @@ if __name__ == '__main__':
     )
     loop = asyncio.get_event_loop()
     loop.create_task(check(30))
-    loop.run_forever()
