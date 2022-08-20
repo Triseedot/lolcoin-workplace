@@ -89,8 +89,6 @@ async def switch_to_base(message: Message):
 async def check(wait_for):
     while True:
         logging.warning(1)
-        await asyncio.sleep(wait_for)
-        logging.warning(2)
         transactions = parsing()
         if transactions:
             for transaction in transactions:
@@ -106,6 +104,7 @@ async def check(wait_for):
                                                       f" lolcoin, из которых {transaction['amount'] / 100 - 1} были"
                                                       " зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
                                                       " комиссии.")
+        await asyncio.sleep(wait_for)
 
 
 # main part with all bot commands
@@ -225,7 +224,7 @@ async def unknown_command(message: Message):
 
 # bot start
 if __name__ == '__main__':
-    asyncio.ensure_future(check(60))
+    asyncio.ensure_future(check(30))
     # executor.start_polling(dp, skip_updates=True)
     start_webhook(
         dispatcher=dp,
