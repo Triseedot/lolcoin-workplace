@@ -11,7 +11,7 @@ import logging
 import psycopg2
 from urllib.parse import urlparse
 from transactions_parser import parsing
-from time import sleep
+from asyncio import sleep
 
 # bot initialization
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -89,7 +89,7 @@ async def switch_to_base(message: Message):
 async def check(wait_for):
     while True:
         logging.warning(1)
-        sleep(wait_for)
+        await sleep(wait_for)
         logging.warning(2)
         transactions = parsing()
         if transactions:
