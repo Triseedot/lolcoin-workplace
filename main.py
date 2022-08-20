@@ -12,6 +12,8 @@ import psycopg2
 from urllib.parse import urlparse
 from transactions_parser import parsing
 import asyncio
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # bot initialization
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -89,6 +91,8 @@ async def switch_to_base(message: Message):
 async def check(wait_for):
     while True:
         logging.warning(1)
+        await asyncio.sleep(wait_for)
+        logging.warning(3)
         transactions = parsing()
         if transactions:
             for transaction in transactions:
@@ -104,9 +108,6 @@ async def check(wait_for):
                                                       f" lolcoin, из которых {transaction['amount'] / 100 - 1} были"
                                                       " зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
                                                       " комиссии.")
-        logging.warning(2)
-        await asyncio.sleep(wait_for)
-        logging.warning(3)
 
 
 # main part with all bot commands
@@ -226,8 +227,8 @@ async def unknown_command(message: Message):
 
 # bot start
 if __name__ == '__main__':
-    asyncio.ensure_future(check(30))
-    # executor.start_polling(dp, skip_updates=True)
+    loop = asyncio.get_event_loop()
+    loop.create_task(check(30))
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
