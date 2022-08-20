@@ -112,6 +112,7 @@ async def check(wait_for):
 async def on_startup(dispatcher):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
+    await check(30)
 
 
 async def on_shutdown(dispatcher):
@@ -217,8 +218,8 @@ async def unknown_command(message: Message):
 
 # bot start
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.create_task(check(60))
+    # loop = asyncio.get_event_loop()
+    # loop.create_task(check(30))
     '''
     start_webhook(
         dispatcher=dp,
