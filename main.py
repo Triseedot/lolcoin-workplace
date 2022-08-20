@@ -1,5 +1,5 @@
 import os
-from aiogram import Bot, types
+from aiogram import Bot, types, executor
 from aiogram.types import Message
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher
@@ -219,6 +219,7 @@ async def unknown_command(message: Message):
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.create_task(check(60))
+    '''
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
@@ -227,4 +228,6 @@ if __name__ == '__main__':
         skip_updates=True,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
-    )
+        )
+    '''
+    executor.start_polling(dp, skip_updates=True)
