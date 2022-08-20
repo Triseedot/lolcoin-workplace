@@ -112,7 +112,6 @@ async def check(wait_for):
 async def on_startup(dispatcher):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
-    await check(60)
 
 
 async def on_shutdown(dispatcher):
