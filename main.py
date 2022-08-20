@@ -86,11 +86,13 @@ async def switch_to_base(message: Message):
     await message.answer("Выберите дейсвтие:", reply_markup=basekb)
 
 
-async def check(wait_for):
+loop = asyncio.get_event_loop()
+delay = 60.0
+
+
+async def check():
     while True:
         logging.warning(1)
-        await asyncio.sleep(wait_for)
-        logging.warning(2)
         transactions = parsing()
         if transactions:
             for transaction in transactions:
@@ -106,6 +108,15 @@ async def check(wait_for):
                                                       f"lolcoin, из которых {transaction['amount'] / 100 - 1} были"
                                                       "зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
                                                       " комиссии.")
+        when_to_call = loop.time() + delay
+        loop.call_at(when_to_call, my_callback)
+
+
+def my_callback():
+    asyncio.ensure_future(check())
+
+
+await check()
 
 
 # main part with all bot commands
@@ -226,6 +237,3 @@ if __name__ == '__main__':
         host=WEBAPP_HOST,
         port=WEBAPP_PORT,
     )
-    loop = asyncio.get_event_loop()
-    asyncio.ensure_future(check(60))
-    loop.run_forever()
