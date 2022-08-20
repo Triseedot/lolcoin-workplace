@@ -12,7 +12,7 @@ file_transactions = file.read().split('\n')
 
 def parsing():
     URL = SITE_URL + "/accounts/lolcoin.qbit.near"
-    page = requests.get(URL + f":{PORT}")
+    page = requests.get(URL)
     soup = bs(page.text, "html.parser")
     transactions = []
     for element in soup.find_all('div', class_='c-ActionRowTransaction-lbSlCc col'):
@@ -31,7 +31,7 @@ def parsing():
     sender = ''
     for TRANSACTION_URL in transactions:
         URL = SITE_URL + TRANSACTION_URL
-        page = requests.get(URL + f":{PORT}")
+        page = requests.get(URL)
         soup = bs(page.text, "html.parser")
         result = soup.find('div', class_='c-ReceiptRowStatus-cQiaau col')
         if result.text != 'Empty result':

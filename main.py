@@ -87,6 +87,7 @@ async def switch_to_base(message: Message):
 
 
 async def check():
+    logging.warning(1)
     transactions = parsing()
     if transactions:
         for transaction in transactions:
