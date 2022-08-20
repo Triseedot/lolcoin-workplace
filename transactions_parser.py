@@ -4,6 +4,7 @@ import os
 
 SITE_URL = "https://explorer.mainnet.near.org"
 PLATFORM_ID = "lolcoin_platform.near"
+PORT = int(os.getenv("PORT", default=5000))
 
 file = open('transictions_list.txt', 'r+')
 file_transactions = file.read().split('\n')
@@ -15,6 +16,7 @@ def parsing():
     soup = bs(page.text, "html.parser")
     transactions = []
     for element in soup.find_all('div', class_='c-ActionRowTransaction-lbSlCc col'):
+        print(1)
         transaction = element.find('a', href=True)
         transaction_url = transaction['href']
         if transaction_url in file_transactions:
