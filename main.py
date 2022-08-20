@@ -211,6 +211,8 @@ async def balance_command(message: Message):
 async def transfer_update(message: Message):
     if message.from_user.id == admin:
         await check()
+    else:
+        await message.answer(f'Not admin, {message.from_user.id}, {admin}')
 
 
 @dp.message_handler(state=SG.BasicState)
