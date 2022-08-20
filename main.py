@@ -90,9 +90,7 @@ async def switch_to_base(message: Message):
 
 async def check(wait_for):
     while True:
-        logging.warning(1)
         await asyncio.sleep(wait_for)
-        logging.warning(3)
         transactions = parsing()
         if transactions:
             for transaction in transactions:
