@@ -25,7 +25,7 @@ dp.middleware.setup(LoggingMiddleware())
 # admin id define
 admin = os.getenv('ADMIN_ID')
 
-'''# webhook settings
+# webhook settings
 APP_NAME = os.getenv('APP_NAME')
 WEBHOOK_HOST = f'https://{APP_NAME}.herokuapp.com'
 WEBHOOK_PATH = '/webhook/' + BOT_TOKEN
@@ -33,7 +33,9 @@ WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 # webserver settings
 WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = int(os.getenv("PORT", default=8000))'''
+WEBAPP_PORT = int(os.getenv("PORT", default=8000))
+
+background_tasks = set()
 
 # database setup
 DB_URL = os.getenv('DATABASE_URL')
@@ -91,7 +93,7 @@ async def switch_to_base(message: Message):
 
 
 # main part with all bot commands
-'''async def on_startup(dispatcher):
+async def on_startup(dispatcher):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
 
@@ -102,7 +104,7 @@ async def on_shutdown(dispatcher):
     conn.close()
     # await dp.storage.close()
     # await dp.storage.wait_closed()
-    logging.warning('Bye!')'''
+    logging.warning('Bye!')
 
 
 async def help_message(message: Message):
@@ -230,9 +232,10 @@ async def check(wait_for):
 
 # bot start
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.create_task(check(30))
-    '''start_webhook(
+    # loop = asyncio.get_event_loop()
+    task = asyncio.create_task(check(30))
+    background_tasks.add(task)
+    start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
@@ -240,5 +243,5 @@ if __name__ == '__main__':
         skip_updates=True,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT
-    )'''
-    executor.start_polling(dp, skip_updates=True)
+    )
+    # executor.start_polling(dp, skip_updates=True)
