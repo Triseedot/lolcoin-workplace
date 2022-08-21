@@ -25,7 +25,7 @@ dp.middleware.setup(LoggingMiddleware())
 # admin id define
 admin = os.getenv('ADMIN_ID')
 
-# webhook settings
+'''# webhook settings
 APP_NAME = os.getenv('APP_NAME')
 WEBHOOK_HOST = f'https://{APP_NAME}.herokuapp.com'
 WEBHOOK_PATH = '/webhook/' + BOT_TOKEN
@@ -33,7 +33,7 @@ WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 # webserver settings
 WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = int(os.getenv("PORT", default=8000))
+WEBAPP_PORT = int(os.getenv("PORT", default=8000))'''
 
 # database setup
 DB_URL = os.getenv('DATABASE_URL')
@@ -90,28 +90,8 @@ async def switch_to_base(message: Message):
     await message.answer("Выберите дейсвтие:", reply_markup=basekb)
 
 
-async def check(wait_for):
-    while True:
-        await asyncio.sleep(wait_for)
-        transactions = parsing()
-        if transactions:
-            for transaction in transactions:
-                logging.warning(transaction["amount"])
-                cur.execute(f"""SELECT * FROM users WHERE wallet_id = '{transaction["sender"]}'""")
-                result = cur.fetchone()
-                if result and transaction["amount"] >= 200:
-                    result = [result[0], result[4]]
-                    cur.execute(
-                        f"""UPDATE users SET balance = {result[1] + transaction["amount"] - 100} WHERE id = '{result[0]}'"""
-                    )
-                    await bot.send_message(result[0], f"✅ Вы перевели на платформу {transaction['amount'] / 100}"
-                                                      f" lolcoin, из которых {transaction['amount'] / 100 - 1} были"
-                                                      " зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
-                                                      " комиссии.")
-
-
 # main part with all bot commands
-async def on_startup(dispatcher):
+'''async def on_startup(dispatcher):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
 
@@ -122,7 +102,7 @@ async def on_shutdown(dispatcher):
     conn.close()
     # await dp.storage.close()
     # await dp.storage.wait_closed()
-    logging.warning('Bye!')
+    logging.warning('Bye!')'''
 
 
 async def help_message(message: Message):
@@ -225,13 +205,34 @@ async def unknown_command(message: Message):
     await message.answer("Команда не была опознана.")
 
 
+async def check(wait_for):
+    print("Debug: check is awaited")
+    while True:
+        print("Debug: inside while")
+        await asyncio.sleep(wait_for)
+        print("after sleep")
+        transactions = parsing()
+        if transactions:
+            for transaction in transactions:
+                logging.warning(transaction["amount"])
+                cur.execute(f"""SELECT * FROM users WHERE wallet_id = '{transaction["sender"]}'""")
+                result = cur.fetchone()
+                if result and transaction["amount"] >= 200:
+                    result = [result[0], result[4]]
+                    cur.execute(
+                        f"""UPDATE users SET balance = {result[1] + transaction["amount"] - 100} WHERE id = '{result[0]}'"""
+                    )
+                    await bot.send_message(result[0], f"✅ Вы перевели на платформу {transaction['amount'] / 100}"
+                                                      f" lolcoin, из которых {transaction['amount'] / 100 - 1} были"
+                                                      " зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
+                                                      " комиссии.")
+
+
 # bot start
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    # new_task = loop.create_task(check(30))
-    # alltasks.add(new_task)
-    asyncio.run(check(30))
-    asyncio.run(start_webhook(
+    loop.create_task(check(30))
+    '''start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
@@ -239,4 +240,5 @@ if __name__ == '__main__':
         skip_updates=True,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT
-    ))
+    )'''
+    executor.start_polling(dp, skip_updates=True)
