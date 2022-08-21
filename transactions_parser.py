@@ -1,13 +1,33 @@
 import requests
 from bs4 import BeautifulSoup as bs
+import psycopg2
+from urllib.parse import urlparse
 import os
+
+from dotenv import load_dotenv
+load_dotenv()
 
 SITE_URL = "https://explorer.mainnet.near.org"
 PLATFORM_ID = "lolcoin_platform.near"
-PORT = int(os.getenv("PORT", default=5000))
 
-file = open('transictions_list.txt', 'r+')
-file_transactions = file.read().split('\n')
+background_tasks = set()
+
+# database setup
+DB_URL = os.getenv('DATABASE_URL')
+db_parse = urlparse(DB_URL)
+db_username = db_parse.username
+db_password = db_parse.password
+db_name = db_parse.path[1:]
+db_hostname = db_parse.hostname
+db_port = db_parse.port
+conn = psycopg2.connect(
+    database=db_name,
+    user=db_username,
+    password=db_password,
+    host=db_hostname,
+    port=db_port
+)
+cur = conn.cursor()
 
 
 def parsing():
@@ -18,13 +38,16 @@ def parsing():
     for element in soup.find_all('div', class_='c-ActionRowTransaction-lbSlCc col'):
         transaction = element.find('a', href=True)
         transaction_url = transaction['href']
-        if transaction_url in file_transactions:
+        cur.execute(f"""SELECT * FROM transfer_list WHERE transfers_url = '{transaction_url}'""")
+        result = cur.fetchone()
+        if result:
             break
         else:
-            file.write(transaction_url + '\n')
+            cur.execute(f"""INSERT INTO transfer_list VALUES('{transaction_url}')""")
         transactions.append(transaction['href'])
         # if len(transactions) == 5:
         #     break
+    conn.commit()
     transactions_parameters = []
     amount = 0
     sender = ''
