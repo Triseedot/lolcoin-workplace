@@ -230,7 +230,8 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     new_task = loop.create_task(check(30))
     alltasks.add(new_task)
-    asyncio.run(*alltasks)
+    for task in alltasks:
+        asyncio.run(task)
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
