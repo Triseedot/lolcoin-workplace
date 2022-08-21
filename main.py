@@ -12,6 +12,7 @@ import psycopg2
 from urllib.parse import urlparse
 from transactions_parser import parsing
 import asyncio
+import datetime
 # from dotenv import load_dotenv
 # load_dotenv()
 
@@ -209,6 +210,7 @@ async def unknown_command(message: Message):
 
 async def check(wait_for):
     print("Debug: check is awaited")
+
     while True:
         print("Debug: inside while")
         await asyncio.sleep(wait_for)
@@ -230,11 +232,15 @@ async def check(wait_for):
                                                       " комиссии.")
 
 
+async def start_check():
+    future = asyncio.ensure_future(check(30))
+
 # bot start
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    task = loop.create_task(check(30))
-    background_tasks.add(task)
+    # loop = asyncio.get_event_loop()
+    # task = loop.create_task(check(30))
+    # background_tasks.add(task)
+    start_check()
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
