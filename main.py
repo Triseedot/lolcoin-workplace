@@ -82,6 +82,8 @@ button5 = types.InlineKeyboardButton(text="FAQ ❓")
 button6 = types.InlineKeyboardButton(text="Жалоба ❗")
 basekb.add(button1).row(button2, button3).row(button4, button5).add(button6)
 
+alltasks = set()
+
 
 async def switch_to_base(message: Message):
     await SG.BasicState.set()
@@ -226,7 +228,8 @@ async def unknown_command(message: Message):
 # bot start
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.create_task(check(30))
+    new_task = loop.create_task(check(30))
+    alltasks.add(new_task)
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
