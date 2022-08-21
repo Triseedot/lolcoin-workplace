@@ -13,8 +13,8 @@ from urllib.parse import urlparse
 from transactions_parser import parsing
 import asyncio
 import datetime
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # bot initialization
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -230,6 +230,7 @@ async def check(wait_for):
                                                       f" lolcoin, из которых {transaction['amount'] / 100 - 1} были"
                                                       " зачислены на баланс, а оставшийся 1 ЛОЛкоин взят в качестве"
                                                       " комиссии.")
+            conn.commit()
 
 
 # bot start
