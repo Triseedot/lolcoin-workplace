@@ -232,7 +232,7 @@ async def check(wait_for):
 
 # bot start
 if __name__ == '__main__':
-    # loop = asyncio.get_event_loop()
+    loop = asyncio.get_event_loop()
     task = asyncio.create_task(check(30))
     background_tasks.add(task)
     start_webhook(
