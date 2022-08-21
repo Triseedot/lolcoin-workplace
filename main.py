@@ -231,7 +231,7 @@ if __name__ == '__main__':
     # new_task = loop.create_task(check(30))
     # alltasks.add(new_task)
     asyncio.run(check(30))
-    start_webhook(
+    asyncio.run(start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
@@ -239,4 +239,4 @@ if __name__ == '__main__':
         skip_updates=True,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT
-    )
+    ))
