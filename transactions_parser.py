@@ -4,8 +4,8 @@ import psycopg2
 from urllib.parse import urlparse
 import os
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 SITE_URL = "https://explorer.mainnet.near.org"
 PLATFORM_ID = "lolcoin_platform.near"
