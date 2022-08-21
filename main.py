@@ -27,14 +27,14 @@ dp.middleware.setup(LoggingMiddleware())
 admin = os.getenv('ADMIN_ID')
 
 # webhook settings
-APP_NAME = os.getenv('APP_NAME')
+'''APP_NAME = os.getenv('APP_NAME')
 WEBHOOK_HOST = f'https://{APP_NAME}.herokuapp.com'
 WEBHOOK_PATH = '/webhook/' + BOT_TOKEN
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 # webserver settings
 WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = int(os.getenv("PORT", default=8000))
+WEBAPP_PORT = int(os.getenv("PORT", default=8000))'''
 
 background_tasks = set()
 
@@ -85,7 +85,7 @@ button5 = types.InlineKeyboardButton(text="FAQ ❓")
 button6 = types.InlineKeyboardButton(text="Жалоба ❗")
 basekb.add(button1).row(button2, button3).row(button4, button5).add(button6)
 
-alltasks = set()
+'''alltasks = set()'''
 
 
 async def switch_to_base(message: Message):
@@ -94,7 +94,7 @@ async def switch_to_base(message: Message):
 
 
 # main part with all bot commands
-async def on_startup(dispatcher):
+'''async def on_startup(dispatcher):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
 
@@ -105,7 +105,7 @@ async def on_shutdown(dispatcher):
     conn.close()
     # await dp.storage.close()
     # await dp.storage.wait_closed()
-    logging.warning('Bye!')
+    logging.warning('Bye!')'''
 
 
 async def help_message(message: Message):
@@ -238,7 +238,7 @@ if __name__ == '__main__':
     # task = loop.create_task(check(30))
     # background_tasks.add(task)
     future = asyncio.ensure_future(check(30))
-    start_webhook(
+    '''start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
         on_startup=on_startup,
@@ -246,5 +246,5 @@ if __name__ == '__main__':
         skip_updates=True,
         host=WEBAPP_HOST,
         port=WEBAPP_PORT
-    )
-    # executor.start_polling(dp, skip_updates=True)
+    )'''
+    executor.start_polling(dp, skip_updates=True)
