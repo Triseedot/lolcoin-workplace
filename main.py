@@ -13,8 +13,8 @@ from urllib.parse import urlparse
 from transactions_parser import parsing
 import asyncio
 import datetime
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # bot initialization
 BOT_TOKEN = os.getenv('BOT_TOKEN')
