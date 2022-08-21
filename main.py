@@ -232,15 +232,12 @@ async def check(wait_for):
                                                       " комиссии.")
 
 
-async def start_check():
-    future = asyncio.ensure_future(check(30))
-
 # bot start
 if __name__ == '__main__':
     # loop = asyncio.get_event_loop()
     # task = loop.create_task(check(30))
     # background_tasks.add(task)
-    await start_check()
+    future = asyncio.ensure_future(check(30))
     start_webhook(
         dispatcher=dp,
         webhook_path=WEBHOOK_PATH,
