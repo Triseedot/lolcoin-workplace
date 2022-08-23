@@ -80,10 +80,12 @@ basekb = types.ReplyKeyboardMarkup(resize_keyboard=True)
 button1 = types.InlineKeyboardButton(text='Баланс 💸')
 button2 = types.InlineKeyboardButton(text='Список предложений 📄')
 button3 = types.InlineKeyboardButton(text='Заключить сделку 📝')
-button4 = types.InlineKeyboardButton(text="Команды ❔")
-button5 = types.InlineKeyboardButton(text="FAQ ❓")
-button6 = types.InlineKeyboardButton(text="Жалоба ❗")
-basekb.add(button1).row(button2, button3).row(button4, button5).add(button6)
+button4 = types.InlineKeyboardButton(text='Выставить на продажу 💰')
+button5 = types.InlineKeyboardButton(text='Текущие сделки 💼')
+button6 = types.InlineKeyboardButton(text="Команды ❔")
+button7 = types.InlineKeyboardButton(text="FAQ ❓")
+button8 = types.InlineKeyboardButton(text="Жалоба ❗")
+basekb.add(button1).row(button2, button3).row(button4, button5).row(button6, button7).add(button8)
 
 '''alltasks = set()'''
 
@@ -112,6 +114,8 @@ async def help_message(message: Message):
     await message.answer('- Как пополнить баланс вы можете узнать при помощи команды /balance.\n'
                          '- Посмотреть текущие товары и услуги можно командой /services.\n'
                          '- Оформить заказ вы можете с помощью /buy.\n'
+                         '- Чтобы выставить товар на продажу используйте /sell. \n'
+                         '- Просмотр статуса текущих сделок осушествляется комадой /status \n'
                          '- Если у вас остались вопросы, возможно вы найдете ответы, введя команду /faq, в противном'
                          ' случае задайте вопрос админу при помощи всё того же /report.'
                          '- Если вам понадобится перечитать это сообщение, напишите /help.\n'
