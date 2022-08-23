@@ -16,29 +16,17 @@ import datetime
 # from dotenv import load_dotenv
 # load_dotenv()
 
-# bot initialization
+# Bot initialization
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = Bot(token=BOT_TOKEN)
 logging.basicConfig(level=logging.INFO)
 dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
 
-# admin id define
+# Admin id define
 admin = os.getenv('ADMIN_ID')
 
-# webhook settings
-'''APP_NAME = os.getenv('APP_NAME')
-WEBHOOK_HOST = f'https://{APP_NAME}.herokuapp.com'
-WEBHOOK_PATH = '/webhook/' + BOT_TOKEN
-WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
-
-# webserver settings
-WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = int(os.getenv("PORT", default=8000))'''
-
-background_tasks = set()
-
-# database setup
+# Database setup
 DB_URL = os.getenv('DATABASE_URL')
 db_parse = urlparse(DB_URL)
 db_username = db_parse.username
@@ -66,50 +54,38 @@ column(5): is_active; boolean (default = false)
 '''
 
 
-# states initialization
+# States initialization
 class SG(StatesGroup):
     BasicState = State()
     ReportState = State()
 
 
-# keyboards initialization
+# Keyboards initialization
 reportkb = types.ReplyKeyboardMarkup(resize_keyboard=True)
 reportkb.add(types.InlineKeyboardButton(text='Отменить ❌'))
 
 basekb = types.ReplyKeyboardMarkup(resize_keyboard=True)
 button1 = types.InlineKeyboardButton(text='Баланс 💸')
-button2 = types.InlineKeyboardButton(text='Список предложений 📄')
-button3 = types.InlineKeyboardButton(text='Заключить сделку 📝')
-button4 = types.InlineKeyboardButton(text='Выставить на продажу 💰')
-button5 = types.InlineKeyboardButton(text='Текущие сделки 💼')
-button6 = types.InlineKeyboardButton(text="Команды ❔")
-button7 = types.InlineKeyboardButton(text="FAQ ❓")
-button8 = types.InlineKeyboardButton(text="Жалоба ❗")
-basekb.add(button1).row(button2, button3).row(button4, button5).row(button6, button7).add(button8)
-
-'''alltasks = set()'''
+button2 = types.InlineKeyboardButton(text="Жалоба ❗")
+button3 = types.InlineKeyboardButton(text='Список предложений 📄')
+button4 = types.InlineKeyboardButton(text='Заключить сделку 📝')
+button5 = types.InlineKeyboardButton(text='Выставить на продажу 💰')
+button6 = types.InlineKeyboardButton(text='Текущие сделки 💼')
+button7 = types.InlineKeyboardButton(text="Команды ❔")
+button8 = types.InlineKeyboardButton(text="FAQ ❓")
+basekb.row(button1, button2).row(button3, button4).row(button5, button6).row(button7, button8)
 
 
+# Switching state and keyboard to basic function
 async def switch_to_base(message: Message):
     await SG.BasicState.set()
     await message.answer("Выберите дейсвтие:", reply_markup=basekb)
 
 
-# main part with all bot commands
-'''async def on_startup(dispatcher):
-    await bot.delete_webhook()
-    await bot.set_webhook(WEBHOOK_URL)
+# Main part with all bot commands:
 
 
-async def on_shutdown(dispatcher):
-    logging.warning('Shutting down..')
-    await bot.delete_webhook()
-    conn.close()
-    # await dp.storage.close()
-    # await dp.storage.wait_closed()
-    logging.warning('Bye!')'''
-
-
+# Sending commands list function
 async def help_message(message: Message):
     await message.answer('- Как пополнить баланс вы можете узнать при помощи команды /balance.\n'
                          '- Посмотреть текущие товары и услуги можно командой /services.\n'
@@ -122,6 +98,8 @@ async def help_message(message: Message):
                          'Вы также можете использовать встроенную клавиатуру вместо того, чтобы писать команды.')
 
 
+# Checking if user is in db when starting using bot. If he is not,
+# he won't be able to use bot commands until admin add him to users table.
 @dp.message_handler()
 async def start(message: Message):
     username = '@' + message.from_user.username
@@ -162,18 +140,26 @@ async def start(message: Message):
                              'команды /report')
 
 
-# @dp.message_handler(commands=['help'])
-@dp.message_handler(state=SG.BasicState, content_types=['text'], text=['Команды ❔', '/help'])
-async def help_command(message: Message):
-    await help_message(message)
+# Checking balance command
+@dp.message_handler(state=SG.BasicState, content_types=['text'], text=['Баланс 💸', '/balance'])
+async def balance_command(message: Message):
+    cur.execute(f"""SELECT balance FROM users WHERE id = '{message.from_user.id}'""")
+    user_balance = float(cur.fetchone()[0]) / 100
+    await message.answer(f'На вашем счету {user_balance} lolcoin\nЧтобы пополнить счет переведите от 2 lolcoin на '
+                         f'lolcoin_platform.near. При любом переводе 1 lolcoin будет взят в качестве комиссии, '
+                         f'а остальное будет зачислено на ваш баланс. После перевода в течении следующих 5-ти минут '
+                         f'система прочитает ваш перевод и вам придёт сообщение о успешном пополнении баланса. Если '
+                         f'же этого не произошло, убедитесь что вы перевели не менее 2 lolcoin, после чего напишите о '
+                         f'проблеме через /report.')
 
 
-# @dp.message_handler(commands=['report'])
+# Report command
 @dp.message_handler(state=SG.BasicState, content_types=['text'], text=['Жалоба ❗', '/report'])
 async def report_command(message: Message):
     await SG.ReportState.set()
     await message.answer('Следующим сообщением напишите текст вашего обращения. Если вы передумали, напишите команду '
-                         '/cancel, или выберете соответствующую опцию в вашей встроенной клавиатуре.', reply_markup=reportkb)
+                         '/cancel, или выберете соответствующую опцию в вашей встроенной клавиатуре.',
+                         reply_markup=reportkb)
 
 
 @dp.message_handler(state=SG.ReportState)
@@ -187,24 +173,9 @@ async def report_send(message: Message):
         await switch_to_base(message)
 
 
-@dp.message_handler(state=SG.BasicState, content_types=['text'], text=['Баланс 💸', '/balance'])
-async def balance_command(message: Message):
-    cur.execute(f"""SELECT balance FROM users WHERE id = '{message.from_user.id}'""")
-    user_balance = float(cur.fetchone()[0]) / 100
-    await message.answer(f'На вашем счету {user_balance} lolcoin\nЧтобы пополнить счет переведите от 2 lolcoin на '
-                         f'lolcoin_platform.near. При любом переводе 1 lolcoin будет взят в качестве комиссии, '
-                         f'а остальное будет зачислено на ваш баланс. После перевода в течении следующих 5-ти минут '
-                         f'система прочитает ваш перевод и вам придёт сообщение о успешном пополнении баланса. Если '
-                         f'же этого не произошло, убедитесь что вы перевели не менее 2 lolcoin, после чего напишите о '
-                         f'проблеме через /report.')
-
-
-@dp.message_handler(state=SG.BasicState, content_types=['text'], text=['/update'])
-async def transfer_update(message: Message):
-    if message.from_user.id == int(admin):
-        await check(60)
-    else:
-        await message.answer(f'Not admin, {message.from_user.id}, {admin}')
+@dp.message_handler(state=SG.BasicState, content_types=['text'], text=['Команды ❔', '/help'])
+async def help_command(message: Message):
+    await help_message(message)
 
 
 @dp.message_handler(state=SG.BasicState)
@@ -212,6 +183,7 @@ async def unknown_command(message: Message):
     await message.answer("Команда не была опознана.")
 
 
+# Checking for new transfer every "wait_for" seconds
 async def check(wait_for):
     print("Debug: check is awaited")
 
@@ -237,19 +209,7 @@ async def check(wait_for):
             conn.commit()
 
 
-# bot start
+# Bot start
 if __name__ == '__main__':
-    # loop = asyncio.get_event_loop()
-    # task = loop.create_task(check(30))
-    # background_tasks.add(task)
-    future = asyncio.ensure_future(check(30))
-    '''start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        skip_updates=True,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT
-    )'''
+    future = asyncio.ensure_future(check(60))
     executor.start_polling(dp, skip_updates=True)
