@@ -65,6 +65,7 @@ class SG(StatesGroup):
     FinishStatus = State()
     DeleteStatus = State()
     CancelStatus = State()
+    ReportNoState = State()
 
 
 class SellSG(StatesGroup):
@@ -131,6 +132,21 @@ async def help_message(message: Message):
                          '- Если вам понадобится перечитать это сообщение, напишите /help.\n'
                          'Вы также можете использовать встроенную клавиатуру вместо того, чтобы писать команды.')
 
+
+@dp.message_handler(content_types=['text'], text=['/report'])
+async def report_command_no_state(message: Message):
+    await SG.ReportState.set()
+    await message.answer('Следующим сообщением напишите текст вашего обращения.')
+    await SG.ReportState.set()
+
+
+@dp.message_handler(state=SG.ReportNoState)
+async def report_send_no_state(message: Message, state: FSMContext):
+    await bot.forward_message(admin, message.chat.id, message.message_id)
+    await bot.send_message(admin, md.text(str(message.from_user.username), message.from_user.first_name,
+                                          str(message.from_user.last_name), sep='\n'))
+    await message.answer('Репорт успешно отправлен ✅')
+    await state.finish()
 
 # Checking if user is in db when starting using bot. If he is not,
 # he won't be able to use bot commands until admin add him to users table.
@@ -213,7 +229,7 @@ async def balance_command(message: Message):
 
 
 # Report command
-@dp.message_handler(state=[SG.BasicState, None], content_types=['text'], text=['Жалоба ❗', '/report'])
+@dp.message_handler(state=SG.BasicState, content_types=['text'], text=['Жалоба ❗', '/report'])
 async def report_command(message: Message):
     await SG.ReportState.set()
     await message.answer('Следующим сообщением напишите текст вашего обращения. Если вы передумали, напишите команду '
