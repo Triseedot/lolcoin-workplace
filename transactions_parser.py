@@ -4,9 +4,6 @@ import psycopg2
 from urllib.parse import urlparse
 import os
 
-# from dotenv import load_dotenv
-# load_dotenv()
-
 SITE_URL = "https://explorer.mainnet.near.org"
 PLATFORM_ID = "lolcoin_platform.near"
 
@@ -30,7 +27,7 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 
-def parsing():
+async def parsing():
     URL = SITE_URL + "/accounts/lolcoin.qbit.near"
     page = requests.get(URL)
     soup = bs(page.text, "html.parser")
@@ -42,8 +39,7 @@ def parsing():
         result = cur.fetchone()
         if result:
             break
-        else:
-            cur.execute(f"""INSERT INTO transfer_list VALUES('{transaction_url}')""")
+        cur.execute(f"""INSERT INTO transfer_list VALUES('{transaction_url}')""")
         transactions.append(transaction['href'])
         # if len(transactions) == 5:
         #     break
