@@ -201,14 +201,15 @@ async def back(message: Message, state=FSMContext):
 async def balance_command(message: Message):
     cur.execute(f"""SELECT balance FROM users WHERE id = %s""", (message.from_user.id,))
     user_balance = float(cur.fetchone()[0]) / 100
-    await message.answer(
-        f'<b>На вашем счету {user_balance} lolcoin</b>\nЧтобы пополнить счет переведите от 2 lolcoin на '
-        f'lolcoin_platform.near. При любом переводе 1 lolcoin будет взят в качестве комиссии, '
-        f'а остальное будет зачислено на ваш баланс. После перевода в течении следующей минуты '
-        f'система прочитает ваш перевод и вам придёт сообщение о успешном пополнении баланса. Если '
-        f'же этого не произошло, убедитесь что вы перевели не менее 2 lolcoin в период после того, '
-        f'как начали работать с ботом и напишите о проблеме "/report".',
-        parse_mode=ParseMode.HTML)
+    await bot.send_photo(message.chat.id, "https://i.imgur.com/haJcqm1.png",
+                         f'<b>На вашем счету {user_balance} lolcoin</b>\nЧтобы пополнить счет переведите от 2 lolcoin '
+                         f'на lolcoin_platform.near. При любом переводе 1 lolcoin будет взят в качестве комиссии, '
+                         f'а остальное будет зачислено на ваш баланс. После перевода в течении следующей минуты '
+                         f'система прочитает ваш перевод и вам придёт сообщение о успешном пополнении баланса. Если '
+                         f'же этого не произошло, убедитесь что вы перевели не менее 2 lolcoin в период после того, '
+                         f'как начали работать с ботом и напишите о проблеме "/report".',
+                         parse_mode=ParseMode.HTML
+                         )
 
 
 # Report command
