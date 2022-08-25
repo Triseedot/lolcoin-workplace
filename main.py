@@ -255,12 +255,12 @@ async def services_command(message: Message, state: FSMContext):
         result = cur.fetchone()
         if not result:
             break
-        answer_text += f"{result[0]}) *{result[1]}* - {result[9]} ЛОЛ\n"
+        answer_text += f"{result[0]}) <b>{result[1]}</b> - {result[9]} ЛОЛ\n"
     if not answer_text:
         await message.answer('Сейчас на платформе нету доступный товаров, но вы можете это исправить, выставив на '
                              'продажу свой!')
         return
-    await message.answer(answer_text, parse_mode=ParseMode.MARKDOWN)
+    await message.answer(answer_text, parse_mode="HTML")
     await SG.ServicesList.set()
     async with state.proxy() as data:
         data["is_buying"] = message.text == 'Заключить сделку 📝' or message.text == '/buy'
@@ -290,8 +290,8 @@ async def service_desc(message: types.Message, state=FSMContext):
     else:
         service_description = 'Описание не прилагается.'
     await message.answer(md.text(
-        md.bold(result[1]), md.text(service_description), md.code('Тип товара —', service_type), sep='\n\n'
-    ), parse_mode=ParseMode.MARKDOWN
+        md.hbold(result[1]), md.text(service_description), md.hcode('Тип товара —', service_type), sep='\n\n'
+        ), parse_mode="HTML"
     )
     async with state.proxy() as data:
         if data["is_buying"]:
@@ -549,27 +549,27 @@ async def sell_unknown(message: types.Message):
 @dp.message_handler(state=SG.BasicState, content_types=['text'], text=['/status', 'Текущие сделки 💼'])
 async def status_command(message: types.Message):
     cur.execute("""SELECT * FROM products_list WHERE seller = %s ORDER BY id""", (message.from_user.id,))
-    answer_text = '*Ваши товары, выставленные на продажу:*\n'
+    answer_text = '<b>Ваши товары, выставленные на продажу:</b>\n'
     sell_products = ''
     while True:
         result = cur.fetchone()
         if not result:
             break
-        sell_products += f"{result[0]}) *{result[1]}* - {result[9]} ЛОЛ\n"
+        sell_products += f"{result[0]}) <b>{result[1]}</b> - {result[9]} ЛОЛ\n"
     if not sell_products:
         sell_products = "У вас нет продаваемых товаров."
-    await message.answer(answer_text + sell_products, parse_mode=ParseMode.MARKDOWN)
+    await message.answer(answer_text + sell_products, parse_mode="HTML")
     cur.execute("""SELECT * FROM products_list WHERE buyer = %s ORDER BY id""", (message.from_user.id,))
-    answer_text = '*Оплаченные товары:*\n'
+    answer_text = '<b>Оплаченные товары:</b>\n'
     buy_products = ''
     while True:
         result = cur.fetchone()
         if not result:
             break
-        buy_products += f"{result[0]}) *{result[1]}* - {result[9]} ЛОЛ\n"
+        buy_products += f"{result[0]}) <b>{result[1]}</b> - {result[9]} ЛОЛ\n"
     if not buy_products:
         buy_products = "У вас нет купленных SPECIAL товаров."
-    await message.answer(answer_text + buy_products, parse_mode=ParseMode.MARKDOWN)
+    await message.answer(answer_text + buy_products, parse_mode="HTML")
     await message.answer(
         'Напишите айди (число перед названием) интересующего вас товара, чтобы посмотреть подробную '
         'информацию о нём, илм изменить статус. Напишите "/back", чтобы вернуться в меню.', reply_markup=backkb)
@@ -599,9 +599,9 @@ async def status_select(message: types.Message, state: FSMContext):
         else:
             service_status = "Ожидает покупателя."
         await message.answer(md.text(
-            md.bold(result[1]), md.text(service_description), md.code('Тип товара —', service_type),
+            md.hbold(result[1]), md.text(service_description), md.hcode('Тип товара —', service_type),
             md.text('Осталось:', result[7]), md.text('Статус:', service_status), sep='\n\n'
-        ), parse_mode=ParseMode.MARKDOWN
+        ), parse_mode="HTML"
         )
         if result[8]:
             await message.answer(
@@ -618,9 +618,9 @@ async def status_select(message: types.Message, state: FSMContext):
     else:
         service_status = "В ожидании подтверждения успешного завершения передачи."
         await message.answer(md.text(
-            md.bold(result[1]), md.text(service_description), md.code('Тип товара —', service_type),
+            md.hbold({result[1]}), md.text(service_description), md.hcode('Тип товара —', service_type),
             md.text('Статус:', service_status), sep='\n\n'
-        ), parse_mode=ParseMode.MARKDOWN
+            ), parse_mode="HTML"
         )
         await message.answer('Хотите ли вы изменить статус на "Товар передан"? Делайте это только в том случае, если '
                              'получили товар, иначе мы не сможем гарантировать, что ваши деньги не удут в никуда. '
