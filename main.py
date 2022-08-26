@@ -781,9 +781,9 @@ async def faq_command(message: Message):
                          parse_mode=ParseMode.MARKDOWN)
 
 
-@dp.message_handler(commands="/del", state=SG.BasicState)
+@dp.message_handler(commands="del", state=SG.BasicState)
 async def delete_command_as(message: types.Message):
-    if message.from_user.id != admin:
+    if message.from_user.id != int(admin):
         await message.answer("Сообщение не было опознано.")
         return
     await message.answer("Введите айди удаляемого товара:")
