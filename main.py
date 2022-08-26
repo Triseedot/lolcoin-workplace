@@ -79,6 +79,10 @@ class SellSG(StatesGroup):
     Count = State()
 
 
+class AdminSG(StatesGroup):
+    DeleteServiceAS = State()
+
+
 # Keyboards initialization
 cancelkb = types.ReplyKeyboardMarkup(resize_keyboard=True)
 cancelbutton = types.InlineKeyboardButton(text='Отменить ❌')
@@ -775,6 +779,28 @@ async def faq_command(message: Message):
                          'шуточные ордеры на продажу, товар, не соответствующий названию, или за любое неподобающее в '
                          'нашем понимание поведение.',
                          parse_mode=ParseMode.MARKDOWN)
+
+
+@dp.message_handler(commands="/del", state=SG.BasicState)
+async def delete_command_as(message: types.Message):
+    if message.from_user.id != admin:
+        await message.answer("Сообщение не было опознано.")
+        return
+    await message.answer("Введите айди удаляемого товара:")
+    await AdminSG.DeleteServiceAS.set()
+
+
+@dp.message_handler(lambda message: message.text.isdigit(), state=SG.SelectStatus)
+async def delete_index_as(message: Message):
+    if message.text == 0:
+        await message.answer('Действие успешно отменено ✅')
+        await switch_to_base(message)
+    else:
+        cur.execute("""DELETE FROM products_list WHERE id = %s""", (int(message.text),))
+        cur.execute("""UPDATE products_list SET id = id - 1 WHERE id > %s""", (int(message.text),))
+        conn.commit()
+        await message.answer("Готово!")
+        await switch_to_base(message)
 
 
 @dp.message_handler(state='*', content_types=types.ContentType.ANY)
