@@ -437,14 +437,19 @@ async def description_def(message: Message, state=FSMContext):
 
 @dp.message_handler(state=SellSG.Picture, content_types=['photo'])
 async def picture_def(message: Message, state=FSMContext):
-    if message.text == '/skip' or message.text == 'Пропустить ⏩':
-        async with state.proxy() as data:
-            data['image_id'] = ''
-    else:
-        picture_id = message.photo[0].file_id
-        file_info = await bot.get_file(picture_id)
-        async with state.proxy() as data:
-            data['image_id'] = file_info.file_id
+    picture_id = message.photo[0].file_id
+    file_info = await bot.get_file(picture_id)
+    async with state.proxy() as data:
+        data['image_id'] = file_info.file_id
+    await message.answer('Принято! Перейдём к определению товара. Если ваш товар можно представить как файл, '
+                         'текст, или картинку, нажмите DEFAULT. Иначе нажмите SPECIAL', reply_markup=dskb)
+    await SellSG.next()
+
+
+@dp.message_handler(state=SellSG.Picture, content_types=['text'], text=['/skip', 'Пропустить ⏩'])
+async def picture_def(message: Message, state=FSMContext):
+    async with state.proxy() as data:
+        data['image_id'] = ''
     await message.answer('Принято! Перейдём к определению товара. Если ваш товар можно представить как файл, '
                          'текст, или картинку, нажмите DEFAULT. Иначе нажмите SPECIAL', reply_markup=dskb)
     await SellSG.next()
