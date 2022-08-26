@@ -23,7 +23,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
 
 # Admin id define
-admin = os.getenv('ADMIN_ID')
+admin = [int(os.getenv('ADMIN_ID')), os.getenv('MODERATOR_ID')]
 
 # Database setup
 DB_URL = os.getenv('DATABASE_URL')
@@ -146,11 +146,12 @@ async def report_command_no_state(message: Message):
 
 @dp.message_handler(state=SG.ReportNoState)
 async def report_send_no_state(message: Message, state: FSMContext):
-    await bot.forward_message(admin, message.chat.id, message.message_id)
-    await bot.send_message(admin, md.text(str(message.from_user.username), message.from_user.first_name,
-                                          str(message.from_user.last_name), sep='\n'))
+    await bot.forward_message(admin[0], message.chat.id, message.message_id)
+    await bot.send_message(admin[0], md.text(str(message.from_user.username), message.from_user.first_name,
+                                             str(message.from_user.last_name), message.from_user.id, sep='\n'))
     await message.answer('Репорт успешно отправлен ✅')
     await state.finish()
+
 
 # Checking if user is in db when starting using bot. If he is not,
 # he won't be able to use bot commands until admin add him to users table.
@@ -243,9 +244,9 @@ async def report_command(message: Message):
 
 @dp.message_handler(state=SG.ReportState)
 async def report_send(message: Message):
-    await bot.forward_message(admin, message.chat.id, message.message_id)
-    await bot.send_message(admin, md.text(str(message.from_user.username), message.from_user.first_name,
-                                          str(message.from_user.last_name), sep='\n'))
+    await bot.forward_message(admin[0], message.chat.id, message.message_id)
+    await bot.send_message(admin[0], md.text(str(message.from_user.username), message.from_user.first_name,
+                                             str(message.from_user.last_name), sep='\n'))
     await message.answer('Репорт успешно отправлен ✅')
     await switch_to_base(message)
 
@@ -298,7 +299,7 @@ async def service_desc(message: types.Message, state=FSMContext):
         service_description = 'Описание не прилагается.'
     await message.answer(md.text(
         md.hbold(result[1]), md.text(service_description), md.hcode('Тип товара —', service_type), sep='\n\n'
-        ), parse_mode="HTML"
+    ), parse_mode="HTML"
     )
     if result[12]:
         await bot.send_photo(message.chat.id, result[12])
@@ -651,7 +652,7 @@ async def status_select(message: types.Message, state: FSMContext):
         await message.answer(md.text(
             md.hbold({result[1]}), md.text(service_description), md.hcode('Тип товара —', service_type),
             md.text('Статус:', service_status), sep='\n\n'
-            ), parse_mode="HTML"
+        ), parse_mode="HTML"
         )
         await message.answer('Хотите ли вы изменить статус на "Товар передан"? Делайте это только в том случае, если '
                              'получили товар, иначе мы не сможем гарантировать, что ваши деньги не удут в никуда. '
@@ -808,7 +809,7 @@ async def faq_command(message: Message):
 
 @dp.message_handler(commands="del", state=SG.BasicState)
 async def delete_command_as(message: types.Message):
-    if message.from_user.id != int(admin):
+    if not message.from_user.id in admin:
         await message.answer("Сообщение не было опознано.")
         return
     await message.answer("Введите айди удаляемого товара:")
