@@ -248,13 +248,16 @@ async def report_send(message: Message):
 @dp.message_handler(state=SG.BasicState, content_types=['text'], text=['Список товаров 📄', '/services',
                                                                        'Заключить сделку 📝', '/buy'])
 async def services_command(message: Message, state: FSMContext):
-    cur.execute("""SELECT * FROM products_list WHERE buyer = 0 ORDER BY id""")
+    cur.execute("""SELECT * FROM products_list ORDER BY id""")
     answer_text = ''
     while True:
         result = cur.fetchone()
         if not result:
             break
-        answer_text += f"{result[0]}) <b>{result[1]}</b> - {result[9]} ЛОЛ\n"
+        if result[8]:
+            answer_text = f"{result[0]}) <i>Временно недоступно"
+        else:
+            answer_text += f"{result[0]}) <b>{result[1]}</b> - {result[9]} ЛОЛ\n"
     if not answer_text:
         await message.answer('Сейчас на платформе нету доступный товаров, но вы можете это исправить, выставив на '
                              'продажу свой!')
@@ -275,7 +278,7 @@ async def services_command(message: Message, state: FSMContext):
 
 @dp.message_handler(lambda message: message.text.isdigit(), state=SG.ServicesList)
 async def service_desc(message: types.Message, state=FSMContext):
-    cur.execute(f"""SELECT * FROM products_list WHERE id = %s""", (message.text,))
+    cur.execute(f"""SELECT * FROM products_list WHERE id = %s AND buyer = 0""", (message.text,))
     result = cur.fetchone()
     if not result:
         await message.answer("Некоректный айди, попробуйте ещё раз.")
