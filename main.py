@@ -491,8 +491,8 @@ async def in_file_def(message: types.Message, state=FSMContext):
 
 @dp.message_handler(lambda message: message.text.isdigit(), state=SellSG.Cost)
 async def cost_def(message: types.Message, state=FSMContext):
-    if int(message.text) > 150:
-        await message.answer('У нас всего на платформе менее 150 человек, пожалуйста, введите реальные значения.')
+    if int(message.text) > 5000:
+        await message.answer('Это слишком много для цены одного товара, введите реальные значения.')
         return
     if int(message.text) >= 2:
         await state.update_data(cost=int(message.text))
@@ -524,8 +524,8 @@ async def add_product(state, message):
 
 @dp.message_handler(lambda message: message.text.isdigit(), state=SellSG.Count)
 async def count_def(message: types.Message, state=FSMContext):
-    if int(message.text) > 5000:
-        await message.answer('Это слишком много для цены одного товара, введите реальные значения.')
+    if int(message.text) > 150:
+        await message.answer('У нас всего на платформе менее 150 человек, пожалуйста, введите реальные значения.')
         return
     if int(message.text) >= 1:
         await state.update_data(count=int(message.text))
