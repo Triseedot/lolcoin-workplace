@@ -790,7 +790,7 @@ async def delete_command_as(message: types.Message):
     await AdminSG.DeleteServiceAS.set()
 
 
-@dp.message_handler(lambda message: message.text.isdigit(), state=SG.SelectStatus)
+@dp.message_handler(lambda message: message.text.isdigit(), state=AdminSG.DeleteServiceAS)
 async def delete_index_as(message: Message):
     if message.text == 0:
         await message.answer('Действие успешно отменено ✅')
