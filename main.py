@@ -255,7 +255,7 @@ async def services_command(message: Message, state: FSMContext):
         if not result:
             break
         if result[8]:
-            answer_text = f"{result[0]}) <i>Временно недоступно</i>"
+            answer_text = f"{result[0]}) <i>Временно недоступно</i>\n"
         else:
             answer_text += f"{result[0]}) <b>{result[1]}</b> - {result[9]} ЛОЛ\n"
     if not answer_text:
