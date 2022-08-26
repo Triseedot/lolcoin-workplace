@@ -812,13 +812,13 @@ async def delete_command_as(message: types.Message):
     if not message.from_user.id in admin:
         await message.answer("Сообщение не было опознано.")
         return
-    await message.answer("Введите айди удаляемого товара:")
+    await message.answer("Введите айди удаляемого товара:", reply_markup=cancelkb)
     await AdminSG.DeleteServiceAS.set()
 
 
 @dp.message_handler(lambda message: message.text.isdigit(), state=AdminSG.DeleteServiceAS)
 async def delete_index_as(message: Message):
-    if message.text == 0:
+    if int(message.text) == 0:
         await message.answer('Действие успешно отменено ✅')
         await switch_to_base(message)
     else:
