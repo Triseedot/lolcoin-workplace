@@ -71,6 +71,7 @@ class SG(StatesGroup):
 class SellSG(StatesGroup):
     Header = State()
     Description = State()
+    Picture = State()
     DefType = State()
     DefContact = State()
     InMessage = State()
@@ -191,7 +192,7 @@ async def start(message: Message):
                                      'фамилию при помощи команды /report, чтобы мы исправили эту ошибку.')
             else:
                 await message.answer(f'Ещё раз приветствую вас, {result[1]}! Бот был перезапущен и ваша сессия была '
-                                     f'оборвана, перенаправляем вас обрано...')
+                                     f'оборвана, перенаправляем вас обратно...')
                 await switch_to_base(message)
     else:
         await message.answer('Извините, мы не смогли определить вас как ученика лагеря ЛОЛ. Увы, мы не смогли найти '
@@ -299,6 +300,8 @@ async def service_desc(message: types.Message, state=FSMContext):
         md.hbold(result[1]), md.text(service_description), md.hcode('Тип товара —', service_type), sep='\n\n'
         ), parse_mode="HTML"
     )
+    if result[12]:
+        await bot.send_photo(message.chat.id, result[12])
     async with state.proxy() as data:
         if data["is_buying"]:
             await state.update_data(service_id=int(message.text))
@@ -427,6 +430,21 @@ async def description_def(message: Message, state=FSMContext):
             return
         async with state.proxy() as data:
             data['description'] = message.text
+    await message.answer('Теперь вы можете отправить картинку, сопровождающую описание, либо пропустить пункт. '
+                         'Если во время отправки вас переспросят, отправляйте со сжатием', reply_markup=skipkb)
+    await SellSG.next()
+
+
+@dp.message_handler(state=SellSG.Picture, content_types=['photo'])
+async def picture_def(message: Message, state=FSMContext):
+    if message.text == '/skip' or message.text == 'Пропустить ⏩':
+        async with state.proxy() as data:
+            data['image_id'] = ''
+    else:
+        picture_id = message.photo[0].file_id
+        file_info = await bot.get_file(picture_id)
+        async with state.proxy() as data:
+            data['image_id'] = file_info.file_id
     await message.answer('Принято! Перейдём к определению товара. Если ваш товар можно представить как файл, '
                          'текст, или картинку, нажмите DEFAULT. Иначе нажмите SPECIAL', reply_markup=dskb)
     await SellSG.next()
@@ -519,10 +537,10 @@ async def add_product(state, message):
         else:
             product_id = 1
         cur.execute(f"""INSERT INTO products_list (id, product_name, description, seller, chat_id, message_id, file_id, 
-        count, cost, is_special, contact_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
+        count, cost, is_special, contact_id, image_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
                     (product_id, data['name'], data['description'], data['seller'], data['chat_id'], data['message_id'],
                      data['file_id'], data['count'], data['cost'], data['is_special'],
-                     data['contact_id'],))
+                     data['contact_id'], data['image_id'],))
         conn.commit()
         await message.answer('Готово! Можете проверить, появился ли ваш товар в общем списке 👍')
     await switch_to_base(message)
@@ -609,6 +627,8 @@ async def status_select(message: types.Message, state: FSMContext):
             md.text('Осталось:', result[7]), md.text('Статус:', service_status), sep='\n\n'
         ), parse_mode="HTML"
         )
+        if result[12]:
+            await bot.send_photo(message.chat.id, result[12])
         if result[8]:
             await message.answer(
                 'Хотите ли вы отменить передачу товара покупателю? Если вы не хотите совершать это '
