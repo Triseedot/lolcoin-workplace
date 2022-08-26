@@ -135,9 +135,8 @@ async def help_message(message: Message):
 
 @dp.message_handler(content_types=['text'], text=['/report'])
 async def report_command_no_state(message: Message):
-    await SG.ReportState.set()
     await message.answer('Следующим сообщением напишите текст вашего обращения.')
-    await SG.ReportState.set()
+    await SG.ReportNoState.set()
 
 
 @dp.message_handler(state=SG.ReportNoState)
